@@ -1,6 +1,6 @@
 ﻿namespace TaskManagementAPI.Models
 {
-    public class SharedTasks
+    public class SharedTask
     {
         public int TaskId { get; set; }
         public TaskEntity Task { get; set; }
