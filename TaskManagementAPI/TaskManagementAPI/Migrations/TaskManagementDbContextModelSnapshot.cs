@@ -36,13 +36,15 @@ namespace TaskManagementAPI.Migrations
                         .HasColumnType("text")
                         .HasColumnName("title");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
                         .HasName("pk_categories");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_categories_user_id");
 
                     b.ToTable("categories", (string)null);
                 });
@@ -121,6 +123,10 @@ namespace TaskManagementAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer")
+                        .HasColumnName("category_id");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_date");
@@ -134,14 +140,9 @@ namespace TaskManagementAPI.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("due_date");
 
-                    b.Property<int>("PriorityOfTask")
+                    b.Property<int?>("PriorityOfTask")
                         .HasColumnType("integer")
                         .HasColumnName("priority_of_task");
-
-                    b.Property<string>("ProjectId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("project_id");
 
                     b.Property<int>("Status")
                         .HasMaxLength(15)
@@ -159,6 +160,9 @@ namespace TaskManagementAPI.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_tasks");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_tasks_category_id");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_tasks_user_id");
@@ -214,6 +218,18 @@ namespace TaskManagementAPI.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("TaskManagementAPI.Models.Category", b =>
+                {
+                    b.HasOne("TaskManagementAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_categories_users_user_id");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TaskManagementAPI.Models.Comment", b =>
                 {
                     b.HasOne("TaskManagementAPI.Models.TaskEntity", "Task")
@@ -258,12 +274,21 @@ namespace TaskManagementAPI.Migrations
 
             modelBuilder.Entity("TaskManagementAPI.Models.TaskEntity", b =>
                 {
+                    b.HasOne("TaskManagementAPI.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_tasks_categories_category_id");
+
                     b.HasOne("TaskManagementAPI.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_tasks_users_user_id");
+
+                    b.Navigation("Category");
 
                     b.Navigation("User");
                 });

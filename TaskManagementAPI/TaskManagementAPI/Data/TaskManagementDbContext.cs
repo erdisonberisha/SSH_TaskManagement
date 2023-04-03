@@ -19,6 +19,7 @@ namespace TaskManagementAPI.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<SharedTask>().HasKey(x => new { x.TaskId, x.UserId });
+            modelBuilder.UseIdentityColumns();
         }
     }
 }

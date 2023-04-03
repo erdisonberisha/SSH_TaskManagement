@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.EntityFrameworkCore;
+using TaskManagementAPI.Data.UnitOfWork;
 using TaskManagementAPI.Models;
 using TaskManagementAPI.Services.Interfaces;
 
@@ -6,9 +9,26 @@ namespace TaskManagementAPI.Services
 {
     public class TaskService : ITaskService
     {
-        public Task Delete(int id, string userId)
+        private readonly IUnitOfWork _unitOfWork;
+
+        public TaskService(IUnitOfWork unitOfWork)
         {
-            throw new NotImplementedException();
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<bool> Delete(int id, int userId)
+        {
+            var task = await _unitOfWork.TaskRepository.GetByCondition(x=> x.Id == id && x.UserId == userId).FirstOrDefaultAsync();
+            if(task != null)
+            {
+               _unitOfWork.TaskRepository.Delete(task);
+               await _unitOfWork.CompleteAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public Task<byte[]> Export(string userId, List<int> tasksId)
@@ -16,29 +36,38 @@ namespace TaskManagementAPI.Services
             throw new NotImplementedException();
         }
 
-        public Task<TaskEntity> Filter(TaskEntity filter, string userId)
+        public Task<TaskEntity> Filter(TaskEntity filter, int userId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<TaskEntity> GetTaskById(int id, string userId)
+        public async Task<TaskEntity?> GetTaskById(int id, int userId)
         {
-            throw new NotImplementedException();
+            var task = await _unitOfWork.TaskRepository.GetByCondition(x=> x.Id == id && x.UserId == userId).FirstOrDefaultAsync();
+            return task;
         }
 
-        public Task<IEnumerable<TaskEntity>> GetTaskByProject(string projectId)
+        public async Task<IEnumerable<TaskEntity>> GetTasksByCategory(int categoryId, int userId)
         {
-            throw new NotImplementedException();
+            var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.CategoryId == categoryId && x.UserId == userId && x.Status != StatusType.Completed).ToListAsync();
+            return tasks;
         }
 
-        public Task<IEnumerable<TaskEntity>> GetTodayTasks(string userId)
+        public async Task<IEnumerable<TaskEntity>> GetTodayTasks(int userId)
         {
-            throw new NotImplementedException();
+            var tasks = await _unitOfWork.TaskRepository.GetByCondition(x=> x.UserId== userId
+                                                                                     && x.DueDate.Date == DateTime.Now.Date).ToListAsync();
+
+            return tasks;
         }
 
-        public Task<IEnumerable<TaskEntity>> GetWeeklyTasks(string userId)
+        public async Task<IEnumerable<TaskEntity>> GetWeeklyTasks(int userId)
         {
-            throw new NotImplementedException();
+            var tasks = await _unitOfWork.TaskRepository
+                                      .GetByCondition(x=> x.DueDate.Date >= DateTime.Now.Date
+                                                           && x.DueDate.Date <= DateTime.Now.Date.AddDays(7)
+                                                           &&!x.Status.Equals(StatusType.Completed)).ToListAsync();
+            return tasks;
         }
 
         public Task Import(IFormFile formFile)
@@ -46,22 +75,22 @@ namespace TaskManagementAPI.Services
             throw new NotImplementedException();
         }
 
-        public Task Post(TaskEntity taskToCreate, string userId)
+        public Task Post(TaskEntity taskToCreate, int userId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<string>> SearchAutoComplete(string keywords, string userId)
+        public Task<IEnumerable<string>> SearchAutoComplete(string keywords, int userId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<TaskEntity>> SearchTasksByKeywords(string keywords, int pageNumer, int pageSize, string userId)
+        public Task<IEnumerable<TaskEntity>> SearchTasksByKeywords(string keywords, int pageNumer, int pageSize, int userId)
         {
             throw new NotImplementedException();
         }
 
-        public Task Update(int id, JsonPatchDocument<TaskEntity> task, string userId)
+        public Task Update(int id, JsonPatchDocument<TaskEntity> task, int userId)
         {
             throw new NotImplementedException();
         }

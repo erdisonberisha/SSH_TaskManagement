@@ -15,8 +15,10 @@ namespace TaskManagementAPI.Models
         public int UserId { get; set; }
         [JsonIgnore]
         public User User { get; set; }
-        public string ProjectId { get; set; }
-        public DateTime? DueDate { get; set; }
+        public int CategoryId { get; set; }
+        [JsonIgnore]
+        public Category Category { get; set; }
+        public DateTime DueDate { get; set; }
     }
 
     public enum StatusType
