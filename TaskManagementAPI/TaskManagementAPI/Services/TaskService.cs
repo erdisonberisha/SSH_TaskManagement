@@ -49,7 +49,7 @@ namespace TaskManagementAPI.Services
 
         public async Task<IEnumerable<TaskEntity>> GetTasksByCategory(int categoryId, int userId)
         {
-            var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.CategoryId == categoryId && x.UserId == userId && x.Status != StatusType.Completed).ToListAsync();
+            var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.CategoryId == categoryId && x.UserId == userId && x.Status != StatusType.COMPLETED).ToListAsync();
             return tasks;
         }
 
@@ -66,7 +66,7 @@ namespace TaskManagementAPI.Services
             var tasks = await _unitOfWork.TaskRepository
                                       .GetByCondition(x=> x.DueDate.Date >= DateTime.Now.Date
                                                            && x.DueDate.Date <= DateTime.Now.Date.AddDays(7)
-                                                           &&!x.Status.Equals(StatusType.Completed)).ToListAsync();
+                                                           &&!x.Status.Equals(StatusType.COMPLETED)).ToListAsync();
             return tasks;
         }
 
@@ -75,9 +75,11 @@ namespace TaskManagementAPI.Services
             throw new NotImplementedException();
         }
 
-        public Task Post(TaskEntity taskToCreate, int userId)
+        public async Task Post(TaskEntity taskToCreate, int userId)
         {
-            throw new NotImplementedException();
+            taskToCreate.UserId= userId;
+            await _unitOfWork.TaskRepository.CreateAsync(taskToCreate);
+            await _unitOfWork.CompleteAsync();
         }
 
         public Task<IEnumerable<string>> SearchAutoComplete(string keywords, int userId)

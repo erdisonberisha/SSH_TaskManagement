@@ -9,8 +9,7 @@ namespace TaskManagementAPI.Models
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
-        [MaxLength(15)]
-        public StatusType Status { get; set; } = StatusType.InProgress;
+        public StatusType Status { get; set; } = StatusType.INPROGRESS;
         public PriorityType? PriorityOfTask { get; set; }
         public int UserId { get; set; }
         [JsonIgnore]
@@ -23,9 +22,9 @@ namespace TaskManagementAPI.Models
 
     public enum StatusType
     {
-        InProgress = 1,
-        Completed = 2,
-        Overdue = 3
+        INPROGRESS = 1,
+        COMPLETED = 2,
+        OVERDUE = 3
     }
 
     public enum PriorityType
