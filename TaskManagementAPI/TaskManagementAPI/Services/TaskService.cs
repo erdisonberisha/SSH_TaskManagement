@@ -39,10 +39,6 @@ namespace TaskManagementAPI.Services
             throw new NotImplementedException();
         }
 
-        public Task<TaskEntity> Filter(TaskEntity filter, int userId)
-        {
-            throw new NotImplementedException();
-        }
 
         public async Task<TaskEntity?> GetTaskById(int id, int userId)
         {
@@ -70,11 +66,6 @@ namespace TaskManagementAPI.Services
                                                            && x.DueDate.Date <= DateTime.Now.Date.AddDays(7)
                                                            && !x.Status.Equals(StatusType.COMPLETED)).Include(x=>x.Comments).ToListAsync();
             return tasks;
-        }
-
-        public Task Import(IFormFile formFile)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task Post(TaskCreateDto taskToCreate, int userId)
