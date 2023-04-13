@@ -2,5 +2,6 @@
 {
     public interface ICommentService
     {
+        Task EditComment(int commentId, int userId);
     }
 }

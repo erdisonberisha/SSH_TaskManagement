@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TaskManagementAPI.Models;
+using TaskManagementAPI.Models.Dto;
 using TaskManagementAPI.Services.Interfaces;
 
 namespace TaskManagementAPI.Controllers
@@ -29,7 +30,7 @@ namespace TaskManagementAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateTask([FromBody]TaskEntity task)
+        public async Task<IActionResult> CreateTask([FromBody]TaskCreateDto task)
         {
             await _taskService.Post(task, _userId);
             return Ok("Task created successfully!");

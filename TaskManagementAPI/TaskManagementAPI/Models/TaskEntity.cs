@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace TaskManagementAPI.Models
@@ -14,10 +15,12 @@ namespace TaskManagementAPI.Models
         public int UserId { get; set; }
         [JsonIgnore]
         public User User { get; set; }
-        public int CategoryId { get; set; }
+        public int? CategoryId { get; set; }
         [JsonIgnore]
         public Category Category { get; set; }
         public DateTime DueDate { get; set; }
+
+        public ICollection<Comment> Comments { get; set; }
     }
 
     public enum StatusType

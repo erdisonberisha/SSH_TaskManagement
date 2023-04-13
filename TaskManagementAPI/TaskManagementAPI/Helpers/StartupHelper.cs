@@ -44,6 +44,7 @@ namespace TaskManagementAPI.Helpers
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddTransient<ITaskService, TaskService>();
+            services.AddTransient<ICategoryService, CategoryService>();
         }
         public static void AddSwaggerWithAuth(this IServiceCollection services)
         {
