@@ -13,20 +13,6 @@ namespace TaskManagementAPI.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "categories",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    title = table.Column<string>(type: "text", nullable: false),
-                    user_id = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_categories", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "users",
                 columns: table => new
                 {
@@ -45,6 +31,26 @@ namespace TaskManagementAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "categories",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    title = table.Column<string>(type: "text", nullable: false),
+                    user_id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_categories", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_categories_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "tasks",
                 columns: table => new
                 {
@@ -54,14 +60,20 @@ namespace TaskManagementAPI.Migrations
                     description = table.Column<string>(type: "text", nullable: false),
                     created_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     status = table.Column<int>(type: "integer", maxLength: 15, nullable: false),
-                    priority_of_task = table.Column<int>(type: "integer", nullable: false),
+                    priority_of_task = table.Column<int>(type: "integer", nullable: true),
                     user_id = table.Column<int>(type: "integer", nullable: false),
-                    project_id = table.Column<string>(type: "text", nullable: false),
+                    category_id = table.Column<int>(type: "integer", nullable: false),
                     due_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_tasks", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_tasks_categories_category_id",
+                        column: x => x.category_id,
+                        principalTable: "categories",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_tasks_users_user_id",
                         column: x => x.user_id,
@@ -125,6 +137,11 @@ namespace TaskManagementAPI.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "ix_categories_user_id",
+                table: "categories",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_comments_task_id",
                 table: "comments",
                 column: "task_id");
@@ -140,6 +157,11 @@ namespace TaskManagementAPI.Migrations
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_tasks_category_id",
+                table: "tasks",
+                column: "category_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_tasks_user_id",
                 table: "tasks",
                 column: "user_id");
@@ -149,9 +171,6 @@ namespace TaskManagementAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "categories");
-
-            migrationBuilder.DropTable(
                 name: "comments");
 
             migrationBuilder.DropTable(
@@ -159,6 +178,9 @@ namespace TaskManagementAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "tasks");
+
+            migrationBuilder.DropTable(
+                name: "categories");
 
             migrationBuilder.DropTable(
                 name: "users");

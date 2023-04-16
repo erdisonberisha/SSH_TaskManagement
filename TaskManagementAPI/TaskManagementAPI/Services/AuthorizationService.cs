@@ -54,7 +54,6 @@ namespace TaskManagementAPI.Services
                 Username = user.Username,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
-                Role = "User"
             };
 
             await _unitOfWork.UserRepository.CreateAsync(newUser);
@@ -92,15 +91,18 @@ namespace TaskManagementAPI.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.Role, user.Role)
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Role, user.Role)
                 }),
+                Issuer = _jwtSettings.Issuer,
+                Audience = _jwtSettings.Audience,
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
     }
 }
