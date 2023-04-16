@@ -40,11 +40,6 @@ namespace TaskManagementAPI.Services
             throw new NotImplementedException();
         }
 
-        public Task<TaskEntity> Filter(TaskEntity filter, int userId)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<TaskEntity?> GetTaskById(int id, int userId)
         {
             var task = await _unitOfWork.TaskRepository.GetByCondition(x => x.Id == id && x.UserId == userId).FirstOrDefaultAsync();
@@ -72,12 +67,6 @@ namespace TaskManagementAPI.Services
                                                            && !x.Status.Equals(StatusType.COMPLETED)).Include(x => x.Comments).ToListAsync();
             return tasks;
         }
-
-        public Task Import(IFormFile formFile)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task Post(TaskCreateDto taskToCreate, int userId)
         {
             var task = new TaskEntity
@@ -97,20 +86,39 @@ namespace TaskManagementAPI.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        public Task<IEnumerable<string>> SearchAutoComplete(string keywords, int userId)
+        public Task<IEnumerable<string>> SearchAutoComplete(string query, int userId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<TaskEntity>> SearchTasksByKeywords(string keywords, int pageNumer, int pageSize, int userId)
+        public async Task<IEnumerable<TaskEntity>> SearchTasks(SearchModel search, int userId)
         {
-            throw new NotImplementedException();
+            var userTasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId).ToListAsync();
+            if(!string.IsNullOrEmpty(search.Query))
+            {
+                userTasks = userTasks.Where(x=> x.Title.Contains(search.Query) || x.Description.Contains(search.Query)).ToList();
+            }
+            if(search.CategoryId is not null)
+            {
+                userTasks = userTasks.Where(x => x.CategoryId == search.CategoryId).ToList();
+            }
+            if (search.Priority is not null)
+            {
+                userTasks = userTasks.Where(x => x.PriorityOfTask == search.Priority).ToList();
+
+            }
+            if(search.Status is not null)
+            {
+                userTasks = userTasks.Where(x=> x.Status == search.Status).ToList();
+            }
+            userTasks = userTasks.Skip((search.Page - 1) * search.PageSize).Take(search.PageSize).ToList();
+            return userTasks;
         }
 
         public async Task<TaskEntity?> Update(int id, JsonPatchDocument<TaskEntity> task, int userId)
         {
             var taskEntity = await GetTaskById(id, userId);
-            if(task is null)
+            if(taskEntity is null)
             {
                 throw new InvalidOperationException($"Task with id {id} and user id {userId} not found.");
             }

@@ -8,7 +8,7 @@ using TaskManagementAPI.Services.Interfaces;
 
 namespace TaskManagementAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/tasks")]
     [ApiController]
     [Authorize]
     public class TaskController : ControllerBase
@@ -73,6 +73,13 @@ namespace TaskManagementAPI.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
+        }
+
+        [HttpGet("/search")]
+        public async Task<IActionResult> SeachForTasks([FromQuery]SearchModel searchModel)
+        {
+            var tasks = await _taskService.SearchTasks(searchModel, _userId);
+            return Ok(tasks);
         }
     }
 }
