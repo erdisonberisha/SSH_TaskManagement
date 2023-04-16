@@ -1,0 +1,34 @@
+version: ‘3.4’
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_USER: fiek
+      POSTGRES_PASSWORD: fiek
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - 5432:5432
+    networks:
+      - postgres
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: fiek@uni-pr.edu
+      PGADMIN_DEFAULT_PASSWORD: fiek
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - 8080:80
+    networks:
+      - postgres
+networks:
+  postgres:
+    driver: bridge
+volumes:
+  postgres:
+    driver: local
+  pgadmin:
+    driver: local
