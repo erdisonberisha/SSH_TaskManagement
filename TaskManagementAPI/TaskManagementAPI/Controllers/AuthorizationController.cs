@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagementAPI.Models.Dto;
-using TaskManagementAPI.Services.Interfaces;
+using IAuthorizationService = TaskManagementAPI.Services.Interfaces.IAuthorizationService;
 
 namespace TaskManagementAPI.Controllers
 {
@@ -38,10 +38,16 @@ namespace TaskManagementAPI.Controllers
                 string token = await _authorizationService.Login(loginDto);
                 return Ok(new { token });
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+        [Authorize]
+        [HttpGet]
+        public ActionResult Get()
+        {
+            return Ok("You are authorized");
         }
     }
 }
