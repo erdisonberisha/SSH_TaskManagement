@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskManagementAPI.Data.UnitOfWork;
 using TaskManagementAPI.Models;
@@ -21,7 +22,7 @@ namespace TaskManagementAPI.Services
 
         public async Task<bool> Delete(int id, int userId)
         {
-            var task = await _unitOfWork.TaskRepository.GetByCondition(x => x.Id == id && x.UserId == userId).FirstOrDefaultAsync();
+            var task = await GetTaskById(id, userId);
             if (task != null)
             {
                 _unitOfWork.TaskRepository.Delete(task);
@@ -39,6 +40,10 @@ namespace TaskManagementAPI.Services
             throw new NotImplementedException();
         }
 
+        public Task<TaskEntity> Filter(TaskEntity filter, int userId)
+        {
+            throw new NotImplementedException();
+        }
 
         public async Task<TaskEntity?> GetTaskById(int id, int userId)
         {
@@ -55,7 +60,7 @@ namespace TaskManagementAPI.Services
         public async Task<IEnumerable<TaskEntity>> GetTodayTasks(int userId)
         {
             var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId
-                                                                                     && x.DueDate.Date == DateTime.Now.Date).Include(x=> x.Comments).ThenInclude(x=> x.User).ToListAsync();
+                                                                                     && x.DueDate.Date == DateTime.Now.Date).Include(x => x.Comments).ThenInclude(x => x.User).ToListAsync();
 
             return tasks;
         }
@@ -64,8 +69,13 @@ namespace TaskManagementAPI.Services
         {
             var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.DueDate.Date >= DateTime.Now.Date
                                                            && x.DueDate.Date <= DateTime.Now.Date.AddDays(7)
-                                                           && !x.Status.Equals(StatusType.COMPLETED)).Include(x=>x.Comments).ToListAsync();
+                                                           && !x.Status.Equals(StatusType.COMPLETED)).Include(x => x.Comments).ToListAsync();
             return tasks;
+        }
+
+        public Task Import(IFormFile formFile)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task Post(TaskCreateDto taskToCreate, int userId)
@@ -74,32 +84,39 @@ namespace TaskManagementAPI.Services
             {
                 Title = taskToCreate.Title,
                 UserId = userId,
-                PriorityOfTask= taskToCreate.PriorityOfTask,
-                CategoryId= taskToCreate.CategoryId,
-                Description= taskToCreate.Description,
-                DueDate= taskToCreate.DueDate,
+                PriorityOfTask = taskToCreate.PriorityOfTask,
+                CategoryId = taskToCreate.CategoryId,
+                Description = taskToCreate.Description,
+                DueDate = taskToCreate.DueDate,
             };
-            if(task.CategoryId is null) 
+            if (task.CategoryId is null || task.CategoryId == 0)
             {
                 task.CategoryId = await _categoryService.GetDefaultCategoryId(userId);
             }
-    await _unitOfWork.TaskRepository.CreateAsync(task);
-    await _unitOfWork.CompleteAsync();
-}
+            await _unitOfWork.TaskRepository.CreateAsync(task);
+            await _unitOfWork.CompleteAsync();
+        }
 
-public Task<IEnumerable<string>> SearchAutoComplete(string keywords, int userId)
-{
-    throw new NotImplementedException();
-}
+        public Task<IEnumerable<string>> SearchAutoComplete(string keywords, int userId)
+        {
+            throw new NotImplementedException();
+        }
 
-public Task<IEnumerable<TaskEntity>> SearchTasksByKeywords(string keywords, int pageNumer, int pageSize, int userId)
-{
-    throw new NotImplementedException();
-}
+        public Task<IEnumerable<TaskEntity>> SearchTasksByKeywords(string keywords, int pageNumer, int pageSize, int userId)
+        {
+            throw new NotImplementedException();
+        }
 
-public Task Update(int id, JsonPatchDocument<TaskEntity> task, int userId)
-{
-    throw new NotImplementedException();
-}
+        public async Task<TaskEntity?> Update(int id, JsonPatchDocument<TaskEntity> task, int userId)
+        {
+            var taskEntity = await GetTaskById(id, userId);
+            if(task is null)
+            {
+                throw new InvalidOperationException($"Task with id {id} and user id {userId} not found.");
+            }
+            task.ApplyTo(taskEntity);
+            await _unitOfWork.CompleteAsync();
+            return taskEntity;
+        }
     }
 }

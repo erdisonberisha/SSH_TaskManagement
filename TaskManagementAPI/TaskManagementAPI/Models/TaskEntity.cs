@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace TaskManagementAPI.Models
 {
@@ -23,17 +21,17 @@ namespace TaskManagementAPI.Models
         public ICollection<Comment> Comments { get; set; }
     }
 
-    public enum StatusType
-    {
-        INPROGRESS = 1,
-        COMPLETED = 2,
-        OVERDUE = 3
-    }
+}
+public enum StatusType
+{
+    INPROGRESS = 1,
+    COMPLETED = 2,
+    OVERDUE = 3
+}
 
-    public enum PriorityType
-    {
-        LOW = 1,
-        MEDIUM = 2,
-        HIGH = 3
-    }
+public enum PriorityType
+{
+    LOW = 1,
+    MEDIUM = 2,
+    HIGH = 3
 }

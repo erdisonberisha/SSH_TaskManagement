@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TaskManagementAPI.Models;
@@ -41,6 +41,38 @@ namespace TaskManagementAPI.Controllers
         {
             var tasks= await _taskService.GetTodayTasks(_userId);
             return Ok(tasks);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteTask(int id)
+        {
+            bool isDeleted = await _taskService.Delete(id, _userId);
+            return !isDeleted ? NotFound() : Ok($"Task with id : {id} was deleted successfully!");
+        }
+
+        [HttpGet("/weekly")]
+        public async Task<IActionResult> GetWeeklyTasks()
+        {
+            var tasks = await _taskService.GetWeeklyTasks(_userId);
+            return Ok(tasks);
+        }
+
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateTask(int id, [FromBody]JsonPatchDocument<TaskEntity> taskPatch)
+        {
+            try
+            {
+                var task = await _taskService.Update(id, taskPatch, _userId);
+                return Ok(task);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
     }
 }

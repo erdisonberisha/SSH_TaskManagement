@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.OpenApi.Models;
 using TaskManagementAPI.Helpers;
 using TaskManagementAPI.Models;
 
@@ -16,6 +14,10 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"))
 builder.Services.AddControllerServices();
 
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

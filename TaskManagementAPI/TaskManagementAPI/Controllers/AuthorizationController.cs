@@ -38,7 +38,7 @@ namespace TaskManagementAPI.Controllers
                 string token = await _authorizationService.Login(loginDto);
                 return Ok(new { token });
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
