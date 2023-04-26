@@ -16,6 +16,7 @@ namespace TaskManagementAPI.Models.Dto
         [MaxLength(20)]
         [Required]
         public string Username { get; set; }
+        public DateTime DateOfBirth { get; set; }
 
         [Required]
         [MinLength(8)]

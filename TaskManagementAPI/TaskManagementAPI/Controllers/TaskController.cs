@@ -22,7 +22,7 @@ namespace TaskManagementAPI.Controllers
             _taskService = taskService;
         }
 
-        [HttpGet("/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
             var task = await _taskService.GetTaskById(id, _userId);
@@ -36,8 +36,8 @@ namespace TaskManagementAPI.Controllers
             return Ok("Task created successfully!");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("daily")]
+        public async Task<IActionResult> GetTodayTasks()
         {
             var tasks= await _taskService.GetTodayTasks(_userId);
             return Ok(tasks);
@@ -50,7 +50,14 @@ namespace TaskManagementAPI.Controllers
             return !isDeleted ? NotFound() : Ok($"Task with id : {id} was deleted successfully!");
         }
 
-        [HttpGet("/weekly")]
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var tasks = await _taskService.GetAllTasks(_userId);
+            return Ok(tasks);
+        }
+
+        [HttpGet("weekly")]
         public async Task<IActionResult> GetWeeklyTasks()
         {
             var tasks = await _taskService.GetWeeklyTasks(_userId);
@@ -75,11 +82,25 @@ namespace TaskManagementAPI.Controllers
             }
         }
 
-        [HttpGet("/search")]
+        [HttpGet("search")]
         public async Task<IActionResult> SeachForTasks([FromQuery]SearchModel searchModel)
         {
             var tasks = await _taskService.SearchTasks(searchModel, _userId);
             return Ok(tasks);
+        }
+
+        [HttpGet("autocomplete")]
+        public async Task<IActionResult> AutocompleteFromQuery(string query)
+        {
+            var taskTitles = await _taskService.SearchAutoComplete(query, _userId);
+            return Ok(taskTitles);
+        }
+
+        [HttpGet("export-to-csv")]
+        public async Task<IActionResult> ExportTasksToCsvAsync()
+        {
+            var csvBytes = await _taskService.ExportAsync(_userId);
+            return File(csvBytes, "text/csv", "tasks.csv");
         }
     }
 }

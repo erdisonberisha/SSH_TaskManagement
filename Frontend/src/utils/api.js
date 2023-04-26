@@ -1,17 +1,23 @@
 // src/utils/api.js
-const API_BASE_URL = 'https://your-api-base-url.com';
 
-export async function login(email, password) {
-  const response = await fetch(`${API_BASE_URL}/login`, {
+const API_BASE_URL = 'https://localhost:7183/api';
+
+export async function login(username, password) {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username, password }),
   });
 
   if (response.ok) {
     const data = await response.json();
+    const token = data.token;
+    localStorage.setItem('token', token);
+    // set user as logged in
+    // ...
+
     return data;
   } else {
     return null;
@@ -31,7 +37,12 @@ export async function register(email, password) {
 }
 
 export async function getDailyTasks() {
-  const response = await fetch(`${API_BASE_URL}/tasks/daily`);
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_BASE_URL}/tasks`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   const data = await response.json();
   return data;
 }

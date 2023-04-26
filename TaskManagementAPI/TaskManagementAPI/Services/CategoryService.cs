@@ -20,12 +20,12 @@ namespace TaskManagementAPI.Services
             throw new NotImplementedException();
         }
 
-        public Task CreateAsync(Category category, string userId)
+        public Task CreateAsync(Category category, int userId)
         {
             throw new NotImplementedException();
         }
 
-        public Task DeleteAsync(int categoryId, string userId)
+        public Task DeleteAsync(int categoryId, int userId)
         {
             throw new NotImplementedException();
         }
@@ -47,7 +47,7 @@ namespace TaskManagementAPI.Services
             return createCategory.Id;
         }
 
-        public Task UpdateCategory(Category category, string userId)
+        public Task UpdateCategory(Category category, int userId)
         {
             throw new NotImplementedException();
         }

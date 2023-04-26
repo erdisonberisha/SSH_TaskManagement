@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using CsvHelper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using System.Formats.Asn1;
+using System.Text;
 using TaskManagementAPI.Data.UnitOfWork;
 using TaskManagementAPI.Models;
 using TaskManagementAPI.Models.Dto;
@@ -35,14 +39,28 @@ namespace TaskManagementAPI.Services
             }
         }
 
-        public Task<byte[]> Export(string userId, List<int> tasksId)
+        public async Task<byte[]> ExportAsync(int userId)
         {
-            throw new NotImplementedException();
+            var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId).ToListAsync();
+            using (var memoryStream = new MemoryStream())
+            using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8))
+            using (var csvWriter = new CsvWriter(streamWriter, System.Globalization.CultureInfo.CurrentCulture))
+            {
+                await csvWriter.WriteRecordsAsync(tasks);
+                await streamWriter.FlushAsync();
+                return memoryStream.ToArray();
+            }
+        }
+
+        public async Task<IEnumerable<TaskEntity>> GetAllTasks(int userId)
+        {
+            var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId && x.Status != StatusType.COMPLETED).ToListAsync();
+            return tasks;
         }
 
         public async Task<TaskEntity?> GetTaskById(int id, int userId)
         {
-            var task = await _unitOfWork.TaskRepository.GetByCondition(x => x.Id == id && x.UserId == userId).FirstOrDefaultAsync();
+            var task = await _unitOfWork.TaskRepository.GetByCondition(x => x.Id == id && x.UserId == userId).Include(x=> x.Comments).FirstOrDefaultAsync();
             return task;
         }
 
@@ -86,9 +104,13 @@ namespace TaskManagementAPI.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        public Task<IEnumerable<string>> SearchAutoComplete(string query, int userId)
+        public async Task<IEnumerable<string>> SearchAutoComplete(string query, int userId)
         {
-            throw new NotImplementedException();
+            List<string> autocomplete = new();
+            var userTasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId).OrderByDescending(x=> x.DueDate).ToListAsync();
+            if (!string.IsNullOrEmpty(query))
+                autocomplete = userTasks.Where(x => x.Title.Contains(query) || x.Description.Contains(query)).Take(5).Select(x=> x.Title).ToList();
+            return autocomplete;
         }
 
         public async Task<IEnumerable<TaskEntity>> SearchTasks(SearchModel search, int userId)

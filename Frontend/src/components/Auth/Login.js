@@ -6,13 +6,13 @@ import { login } from '../../utils/api';
 import { toast } from 'react-toastify';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await login(email, password);
+    const result = await login(username, password);
     if (result) {
       // Save token and user info to localStorage or context
       navigate('/');
@@ -32,10 +32,10 @@ const Login = () => {
           <TextField
             fullWidth
             margin="normal"
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            label="Username"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
           <TextField

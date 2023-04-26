@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TaskManagementAPI.Models.Dto;
 using IAuthorizationService = TaskManagementAPI.Services.Interfaces.IAuthorizationService;
 
@@ -10,7 +12,6 @@ namespace TaskManagementAPI.Controllers
     public class AuthorizationController : ControllerBase
     {
         private readonly IAuthorizationService _authorizationService;
-
         public AuthorizationController(IAuthorizationService authorizationService)
         {
             _authorizationService = authorizationService;
@@ -22,7 +23,7 @@ namespace TaskManagementAPI.Controllers
             try
             {
                 await _authorizationService.Register(registerDto);
-                return Ok("User with username:" + registerDto.Username + "has been created succesfully!");
+                return Ok("User with username:" + registerDto.Username + " has been created succesfully!");
             }
             catch (System.Exception ex)
             {

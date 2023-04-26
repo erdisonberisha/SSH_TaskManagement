@@ -54,6 +54,7 @@ namespace TaskManagementAPI.Services
                 Username = user.Username,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
+                DateOfBirth = user.DateOfBirth,
             };
 
             await _unitOfWork.UserRepository.CreateAsync(newUser);

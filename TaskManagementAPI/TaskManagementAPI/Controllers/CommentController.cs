@@ -1,4 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using TaskManagementAPI.Models;
+using TaskManagementAPI.Models.Dto;
+using TaskManagementAPI.Services;
+using TaskManagementAPI.Services.Interfaces;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -6,38 +13,64 @@ namespace TaskManagementAPI.Controllers
 {
     [Route("api/comments")]
     [ApiController]
+    [Authorize]
     public class CommentController : ControllerBase
     {
-        // GET: api/<CommentController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly ICommentService _commentService;
+        private readonly int _userId;
+
+        public CommentController(ICommentService commentService, IHttpContextAccessor httpContextAccessor)
         {
-            return new string[] { "value1", "value2" };
+            var userIdClaim = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            _userId = int.Parse(userIdClaim.Value);
+            _commentService = commentService;
         }
 
-        // GET api/<CommentController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<IActionResult> GetCommentById(int commentId)
         {
-            return "value";
+            var task = await _commentService.GetCommentById(commentId);
+            return task is null ? NotFound() : Ok(task);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll(int taskId)
+        {
+            var commentsByTaskId = await _commentService.GetAllCommentsForTask(taskId);
+            return Ok(commentsByTaskId);
         }
 
         // POST api/<CommentController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> Post(CommentDto commentDto)
         {
+            await _commentService.WriteComment(commentDto, _userId);
+            return Ok("Comment was added to task");
         }
 
-        // PUT api/<CommentController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateComment(int id, [FromBody] JsonPatchDocument<Comment> commentPatch)
         {
+            try
+            {
+                var comment = await _commentService.EditComment(id, commentPatch, _userId);
+                return Ok(comment);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
-        // DELETE api/<CommentController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            bool isDeleted = await _commentService.DeleteComment(id, _userId);
+            return !isDeleted ? NotFound() : Ok($"Comment with id : {id} was deleted successfully!");
         }
     }
 }
