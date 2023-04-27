@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using TaskManagementAPI.Services;
+using TaskManagementAPI.Services.Interfaces;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TaskManagementAPI.Controllers
 {
@@ -8,36 +12,47 @@ namespace TaskManagementAPI.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        // GET: api/<CategoryController>
+        private readonly ICategoryService _categoryService;
+        private readonly int _userId;
+        public CategoryController(ICategoryService categoryService, IHttpContextAccessor httpContextAccessor)
+        {
+            var userIdClaim = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            _userId = int.Parse(userIdClaim.Value);
+            _categoryService = categoryService;
+        }
+
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<IActionResult> Get()
         {
-            return new string[] { "value1", "value2" };
+            return Ok(await _categoryService.GetAllCategoriesAsync(_userId));
         }
 
-        // GET api/<CategoryController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            return "value";
+            var comment = await _categoryService.GetByIdAsync(id, _userId);
+            return comment is null ? NotFound() : Ok(comment);
         }
 
-        // POST api/<CategoryController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> CreateCategory([FromBody] string title)
         {
+            await _categoryService.CreateAsync(title, _userId);
+            return Ok("Task created successfully!");
         }
 
-        // PUT api/<CategoryController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult> UpdateCategory(int id,[FromBody] string title)
         {
+            var category = await _categoryService.UpdateCategory(id,title, _userId);
+            return Ok(category);
         }
 
-        // DELETE api/<CategoryController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            bool isDeleted = await _categoryService.DeleteAsync(id, _userId);
+            return !isDeleted ? NotFound() : Ok($"Category with id : {id} was deleted successfully!");
         }
     }
 }

@@ -39,8 +39,7 @@ namespace TaskManagementAPI.Controllers
         [HttpGet("daily")]
         public async Task<IActionResult> GetTodayTasks()
         {
-            var tasks= await _taskService.GetTodayTasks(_userId);
-            return Ok(tasks);
+            return Ok(await _taskService.GetTodayTasks(_userId));
         }
 
         [HttpDelete]

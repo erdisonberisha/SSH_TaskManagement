@@ -24,6 +24,11 @@ namespace TaskManagementAPI.Services
             _categoryService = categoryService;
         }
 
+        public Task ApproveInvite(int userId, int sharedTaskId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<bool> Delete(int id, int userId)
         {
             var task = await GetTaskById(id, userId);
@@ -85,6 +90,12 @@ namespace TaskManagementAPI.Services
                                                            && !x.Status.Equals(StatusType.COMPLETED)).Include(x => x.Comments).ToListAsync();
             return tasks;
         }
+
+        public Task InviteUserToTask(int taskId, string username, int userId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task Post(TaskCreateDto taskToCreate, int userId)
         {
             var task = new TaskEntity
@@ -98,7 +109,7 @@ namespace TaskManagementAPI.Services
             };
             if (task.CategoryId is null || task.CategoryId == 0)
             {
-                task.CategoryId = await _categoryService.GetDefaultCategoryId(userId);
+                task.CategoryId = await _categoryService.GetDefaultCategoryIdAsync(userId);
             }
             await _unitOfWork.TaskRepository.CreateAsync(task);
             await _unitOfWork.CompleteAsync();

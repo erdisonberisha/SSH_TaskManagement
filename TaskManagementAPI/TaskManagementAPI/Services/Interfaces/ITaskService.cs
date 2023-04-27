@@ -17,5 +17,7 @@ namespace TaskManagementAPI.Services.Interfaces
         Task<TaskEntity?> Update(int id, JsonPatchDocument<TaskEntity> task, int userId);
         Task<bool> Delete(int id, int userId);
         Task<byte[]> ExportAsync(int userId);
+        Task InviteUserToTask(int taskId,string username,int userId);
+        Task ApproveInvite(int userId, int sharedTaskId);
     }
 }
