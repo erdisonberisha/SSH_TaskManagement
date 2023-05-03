@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace TaskManagementAPI.Controllers
@@ -9,6 +10,7 @@ namespace TaskManagementAPI.Controllers
     {
         // GET: api/<UserController>
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TaskManagementAPI.Helpers;
 using TaskManagementAPI.Models;
 
 namespace TaskManagementAPI.Data
@@ -7,7 +8,6 @@ namespace TaskManagementAPI.Data
     {
         public TaskManagementDbContext(DbContextOptions<TaskManagementDbContext> options) : base(options) 
         {
-
         }
 
         public DbSet<TaskEntity> Tasks { get; set;}
@@ -21,6 +21,11 @@ namespace TaskManagementAPI.Data
             modelBuilder.Entity<SharedTask>().HasKey(x => new { x.TaskId, x.UserId });
             modelBuilder.UseIdentityColumns();
             modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
+            AuthorizationHelper.CreateUserPasswordHash("admin", out byte[] passwordHash, out byte[] passwordSalt);
+            modelBuilder.Entity<User>().HasData(
+                new User { Email = "admin@admin.com", Name = "admin admin", 
+                    DateOfBirth = DateTime.MinValue, PasswordHash = passwordHash, 
+                    PasswordSalt = passwordSalt, Username = "admin", Role = "Admin", Id = 1000});
         }
     }
 }

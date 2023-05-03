@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using TaskManagementAPI.Data.UnitOfWork;
 using TaskManagementAPI.Models;
+using TaskManagementAPI.Helpers;
 using TaskManagementAPI.Models.Dto;
 using TaskManagementAPI.Services.Interfaces;
 
@@ -30,7 +31,7 @@ namespace TaskManagementAPI.Services
                 throw new InvalidOperationException("Invalid username.");
             }
 
-            if (!VerifyPasswordHash(user.Password, foundUser.PasswordHash, foundUser.PasswordSalt))
+            if (!AuthorizationHelper.VerifyPasswordHash(user.Password, foundUser.PasswordHash, foundUser.PasswordSalt))
             {
                 throw new InvalidOperationException("Invalid password.");
             }
@@ -45,7 +46,7 @@ namespace TaskManagementAPI.Services
                 throw new InvalidOperationException("Username already exists.");
             }
 
-            CreateUserPasswordHash(user.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            AuthorizationHelper.CreateUserPasswordHash(user.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
             var newUser = new User
             {
@@ -60,30 +61,6 @@ namespace TaskManagementAPI.Services
             await _unitOfWork.UserRepository.CreateAsync(newUser);
             await _unitOfWork.CompleteAsync();
         }
-
-        private void CreateUserPasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-        {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            }
-        }
-
-        private bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
-        {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
-            {
-                var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-                for (int i = 0; i < computedHash.Length; i++)
-                {
-                    if (computedHash[i] != storedHash[i]) return false;
-                }
-            }
-
-            return true;
-        }
-
         private string GenerateJwtToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -104,6 +81,5 @@ namespace TaskManagementAPI.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-
     }
 }
