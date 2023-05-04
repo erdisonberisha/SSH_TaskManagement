@@ -1,4 +1,5 @@
 ﻿using TaskManagementAPI.Models;
+using TaskManagementAPI.Models.Dto;
 
 namespace TaskManagementAPI.Services.Interfaces
 {

@@ -40,7 +40,7 @@ namespace TaskManagementAPI.Services
             await _unitOfWork.UserRepository.CreateAsync(newUser);
             await _unitOfWork.CompleteAsync();
         }
-
+    
         public async Task<bool> DeleteUserAsync(int userId)
         {
             var user = await GetUserByIdAsync(userId);
