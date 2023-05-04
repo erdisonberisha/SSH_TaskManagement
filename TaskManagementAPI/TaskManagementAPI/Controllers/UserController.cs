@@ -33,7 +33,14 @@ namespace TaskManagementAPI.Controllers
         {
         }
 
-        // DELETE api/<UserController>/5
+        [HttpGet("search")]
+        [Authorize]
+        public async Task<IActionResult> AutoCompleteUsers(string username)
+        {
+            var users = await _userService.SearchUserNamesAsync(username);
+            return user;
+        }
+
         [HttpDelete("{id}")]
         public void Delete(int id)
         {

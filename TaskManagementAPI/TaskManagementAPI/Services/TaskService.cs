@@ -24,9 +24,24 @@ namespace TaskManagementAPI.Services
             _categoryService = categoryService;
         }
 
-        public Task ApproveInvite(int userId, int sharedTaskId)
+        public async Task ApproveInvite(int userId, int taskId)
         {
-            throw new NotImplementedException();
+            var sharedTask = await _unitOfWork.SharedTaskRepository.GetByCondition(x => x.UserId == userId && x.TaskId == taskId && x.Approved == false).FirstOrDefaultAsync();
+            if (sharedTask != null)
+            {
+                sharedTask.Approved = true;
+                _unitOfWork.SharedTaskRepository.Update(sharedTask);
+                await _unitOfWork.CompleteAsync();
+            }
+            else
+            {
+                throw new InvalidOperationException("Invite for task was not found");
+            }
+        }
+
+        public async Task<IEnumerable<SharedTask>> GetPendingInvitesAsync(int userId)
+        {
+            return await _unitOfWork.SharedTaskRepository.GetByCondition(x=> x.UserId == userId && x.Approved == false).Include(x=> x.Task).ToListAsync();
         }
 
         public async Task<bool> Delete(int id, int userId)
@@ -65,7 +80,7 @@ namespace TaskManagementAPI.Services
 
         public async Task<TaskEntity?> GetTaskById(int id, int userId)
         {
-            var task = await _unitOfWork.TaskRepository.GetByCondition(x => x.Id == id && x.UserId == userId).Include(x=> x.Comments).FirstOrDefaultAsync();
+            var task = await _unitOfWork.TaskRepository.GetByCondition(x => x.Id == id && x.UserId == userId).Include(x => x.Comments).FirstOrDefaultAsync();
             return task;
         }
 
@@ -79,7 +94,12 @@ namespace TaskManagementAPI.Services
         {
             var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId
                                                                                      && x.DueDate.Date == DateTime.Now.Date).Include(x => x.Comments).ThenInclude(x => x.User).ToListAsync();
-
+            return tasks;
+        }
+        
+        public async Task<IEnumerable<TaskEntity>> GetSharedTasks(int userId)
+        {
+            var tasks = await _unitOfWork.SharedTaskRepository.GetByCondition(x => x.UserId==userId).Include(x=> x.Task).Select(x => x.Task).ToListAsync();
             return tasks;
         }
 
@@ -91,9 +111,25 @@ namespace TaskManagementAPI.Services
             return tasks;
         }
 
-        public Task InviteUserToTask(int taskId, string username, int userId)
+        public async Task InviteUserToTask(int taskId, string username, int userId)
         {
-            throw new NotImplementedException();
+            bool canInvite = (await _unitOfWork.TaskRepository.GetById(x => x.Id == taskId && x.UserId == userId)
+                                                             .FirstOrDefaultAsync()) is not null;
+            if (canInvite)
+            {
+                var userToInvite = (await _unitOfWork.UserRepository.GetByCondition(x => x.Username == username).FirstOrDefaultAsync()).Id;
+                var sharedTask = new SharedTask
+                {
+                    UserId = userToInvite,
+                    TaskId = taskId
+                };
+                await _unitOfWork.SharedTaskRepository.CreateAsync(sharedTask);
+                await _unitOfWork.CompleteAsync();
+            }
+            else
+            {
+                throw new InvalidOperationException("Invite is not possible");
+            }
         }
 
         public async Task Post(TaskCreateDto taskToCreate, int userId)
@@ -118,20 +154,20 @@ namespace TaskManagementAPI.Services
         public async Task<IEnumerable<string>> SearchAutoComplete(string query, int userId)
         {
             List<string> autocomplete = new();
-            var userTasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId).OrderByDescending(x=> x.DueDate).ToListAsync();
+            var userTasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId).OrderByDescending(x => x.DueDate).ToListAsync();
             if (!string.IsNullOrEmpty(query))
-                autocomplete = userTasks.Where(x => x.Title.Contains(query) || x.Description.Contains(query)).Take(5).Select(x=> x.Title).ToList();
+                autocomplete = userTasks.Where(x => x.Title.Contains(query) || x.Description.Contains(query)).Take(5).Select(x => x.Title).ToList();
             return autocomplete;
         }
 
         public async Task<IEnumerable<TaskEntity>> SearchTasks(SearchModel search, int userId)
         {
             var userTasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId).ToListAsync();
-            if(!string.IsNullOrEmpty(search.Query))
+            if (!string.IsNullOrEmpty(search.Query))
             {
-                userTasks = userTasks.Where(x=> x.Title.Contains(search.Query) || x.Description.Contains(search.Query)).ToList();
+                userTasks = userTasks.Where(x => x.Title.Contains(search.Query) || x.Description.Contains(search.Query)).ToList();
             }
-            if(search.CategoryId is not null)
+            if (search.CategoryId is not null)
             {
                 userTasks = userTasks.Where(x => x.CategoryId == search.CategoryId).ToList();
             }
@@ -140,9 +176,9 @@ namespace TaskManagementAPI.Services
                 userTasks = userTasks.Where(x => x.PriorityOfTask == search.Priority).ToList();
 
             }
-            if(search.Status is not null)
+            if (search.Status is not null)
             {
-                userTasks = userTasks.Where(x=> x.Status == search.Status).ToList();
+                userTasks = userTasks.Where(x => x.Status == search.Status).ToList();
             }
             userTasks = userTasks.Skip((search.Page - 1) * search.PageSize).Take(search.PageSize).ToList();
             return userTasks;
@@ -151,7 +187,7 @@ namespace TaskManagementAPI.Services
         public async Task<TaskEntity?> Update(int id, JsonPatchDocument<TaskEntity> task, int userId)
         {
             var taskEntity = await GetTaskById(id, userId);
-            if(taskEntity is null)
+            if (taskEntity is null)
             {
                 throw new InvalidOperationException($"Task with id {id} and user id {userId} not found.");
             }
