@@ -11,6 +11,6 @@ namespace TaskManagementAPI.Services.Interfaces
         Task<bool> DeleteUserAsync(int userId);
         Task CreateAdminUserAsync(RegisterDto registerDto);
         Task<User?> GetUserByIdAsync(int userId);
-        Task<IEnumerable<string>> SearchUserNamesAsync(string query);
+        Task<IEnumerable<string>> SearchUsernamesAsync(string query);
     }
 }

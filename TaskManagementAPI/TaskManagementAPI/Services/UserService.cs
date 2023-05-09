@@ -80,7 +80,7 @@ namespace TaskManagementAPI.Services
             return await _unitOfWork.UserRepository.GetById(x => x.Id == userId).FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<string>> SearchUserNamesAsync(string query)
+        public async Task<IEnumerable<string>> SearchUsernamesAsync(string query)
         {
             List<string> autocomplete = new();
             if (!string.IsNullOrEmpty(query))

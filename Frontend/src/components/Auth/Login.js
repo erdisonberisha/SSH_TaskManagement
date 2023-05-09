@@ -16,6 +16,7 @@ const Login = () => {
     if (result) {
       // Save token and user info to localStorage or context
       navigate('/');
+      console.log("test");
       toast.success('Logged in successfully');
     } else {
       toast.error('Login failed');

@@ -61,6 +61,14 @@ namespace TaskManagementAPI.Controllers
             return user is null ? NotFound() : Ok(user);
         }
 
+        [HttpGet("search")]
+        [Authorize]
+        public async Task<IActionResult> SearchUsernames(string username)
+        {
+            var users = await _userService.SearchUsernamesAsync(username);
+            return Ok(users);
+        }
+
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)

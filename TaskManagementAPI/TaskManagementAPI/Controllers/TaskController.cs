@@ -56,6 +56,13 @@ namespace TaskManagementAPI.Controllers
             return Ok(tasks);
         }
 
+        [HttpGet("invites")]
+        public async Task<IActionResult> GetAllInvites()
+        {
+            var tasks = await _taskService.GetPendingInvitesAsync(_userId);
+            return Ok(tasks);
+        }
+
         [HttpGet("weekly")]
         public async Task<IActionResult> GetWeeklyTasks()
         {
@@ -81,6 +88,41 @@ namespace TaskManagementAPI.Controllers
             }
         }
 
+        [HttpPost("invites")]
+        public async Task<IActionResult> InviteUserToTask(int taskId, [FromBody]string username)
+        {
+            try
+            {
+                await _taskService.InviteUserToTask(taskId, username, _userId);
+                return Ok("User invited successfully");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPut("invites/approve/{taskId}")]
+        public async Task<IActionResult> ApproveInvite(int taskId)
+        {
+            try
+            {
+                await _taskService.ApproveInvite(_userId,taskId);
+                return Ok("Invite was approved");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
         [HttpGet("search")]
         public async Task<IActionResult> SeachForTasks([FromQuery]SearchModel searchModel)
         {
