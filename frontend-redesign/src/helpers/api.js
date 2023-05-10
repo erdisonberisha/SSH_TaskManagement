@@ -8,10 +8,17 @@ const api = axios.create({
 
 export const login = async (username, password) => {
   try {
-    console.log("entered axios call")
-    console.log(baseURL)
     const response = await api.post('/auth/login', { username, password });
-    return response.data; // Assuming the response contains the JWT token
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const register = async ( name, email, username, birthday, password) => {
+  try {
+    const response = await api.post('/auth/register', { name, email, username, birthday, password });
+    return response.data;
   } catch (error) {
     throw error;
   }
