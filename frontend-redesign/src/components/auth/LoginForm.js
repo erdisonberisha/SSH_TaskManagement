@@ -4,12 +4,10 @@ import { login } from '../../helpers/api';
 import swal from 'sweetalert';
 import { useNavigate } from 'react-router-dom';
 
-
 const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,14 +15,6 @@ const LoginForm = () => {
       navigate('/');
     }
   }, [isLoggedIn, navigate]);
-
-  const handleUsernameChange = (event) => {
-    setUsername(event.target.value);
-  };
-
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
-  };
 
   const handleSubmit = async(event) => {
     event.preventDefault();
@@ -54,9 +44,22 @@ const LoginForm = () => {
       const response = await login(username, password);
       localStorage.setItem('token', response.token);
       setIsLoggedIn(true);
+      swal({
+        title: "Logged in!",
+        text: "Welcome back to DoIt!",
+        icon: "success",
+        timer: 2000,
+        buttons: false
+      });
       navigate('/');
     } catch (error) {
-      setError('Invalid username or password.');
+      swal({
+        title: "Invalid user!",
+        text: "Username or password were incorrect!",
+        icon: "error",
+        timer: 2000,
+        buttons: false
+    });
     }
   };
 
@@ -65,22 +68,21 @@ const LoginForm = () => {
       <div className="bg-white rounded-md shadow-md text-center p-20">
         <h1 className="text-4xl font-bold mb-10">Log in</h1>
         <form className="flex flex-col items-center space-y-4" onSubmit={handleSubmit}>
-          {error && <p className="text-red-500">{error}</p>}
           <input
             type="text"
             placeholder="Username"
             className="px-4 py-2 rounded-md border border-gray-300"
             value={username}
-            onChange={handleUsernameChange}
+            onChange={e => setUsername(e.target.value)}
           />
           <input
             type="password"
             placeholder="Password"
             className="px-4 py-2 rounded-md border border-gray-300"
             value={password}
-            onChange={handlePasswordChange}
+            onChange={e => setPassword(e.target.value)}
           />
-          <Button type="submit" variant="outlined" className="shadow-md">
+          <Button type="submit" variant="outlined" className="shadow-md !mt-10">
             LOGIN
           </Button>
         </form>
