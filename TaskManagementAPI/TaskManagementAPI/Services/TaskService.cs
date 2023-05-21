@@ -1,10 +1,6 @@
 ﻿using CsvHelper;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using System.Formats.Asn1;
 using System.Text;
 using TaskManagementAPI.Data.UnitOfWork;
 using TaskManagementAPI.Models;
@@ -17,11 +13,13 @@ namespace TaskManagementAPI.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICategoryService _categoryService;
+        private readonly INotificationService _notificationService;
 
-        public TaskService(IUnitOfWork unitOfWork, ICategoryService categoryService)
+        public TaskService(IUnitOfWork unitOfWork, ICategoryService categoryService, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _categoryService = categoryService;
+            _notificationService = notificationService;
         }
 
         public async Task ApproveInvite(int userId, int taskId)
@@ -113,9 +111,9 @@ namespace TaskManagementAPI.Services
 
         public async Task InviteUserToTask(int taskId, string username, int userId)
         {
-            bool canInvite = (await _unitOfWork.TaskRepository.GetById(x => x.Id == taskId && x.UserId == userId)
-                                                             .FirstOrDefaultAsync()) is not null;
-            if (canInvite)
+            var task = (await _unitOfWork.TaskRepository.GetById(x => x.Id == taskId && x.UserId == userId).Include(x=>x.User)
+                                                             .FirstOrDefaultAsync());
+            if (task is not null)
             {
                 var userToInvite = (await _unitOfWork.UserRepository.GetByCondition(x => x.Username == username).FirstOrDefaultAsync()).Id;
                 var sharedTask = new SharedTask
@@ -125,6 +123,12 @@ namespace TaskManagementAPI.Services
                 };
                 await _unitOfWork.SharedTaskRepository.CreateAsync(sharedTask);
                 await _unitOfWork.CompleteAsync();
+                var notification = new Notification
+                {
+                    Title = "You have been invited to task " + task.Title + " by user " + task.User.Name + " with username " + task.User.Username,
+                    Description = task.Description,
+                };
+                await _notificationService.CreateNotificationAsync(notification, userId);
             }
             else
             {

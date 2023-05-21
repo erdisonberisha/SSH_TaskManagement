@@ -1,20 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Button } from "@material-tailwind/react";
 import { login } from '../../helpers/api';
 import swal from 'sweetalert';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../helpers/AuthContext';
 
 const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState('');
+  const { loggedIn, setLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  console.log(loggedIn);
+
   useEffect(() => {
-    if (isLoggedIn) {
-      navigate('/');
+    if (loggedIn) {
+      navigate('/dashboard');
     }
-  }, [isLoggedIn, navigate]);
+  }, [loggedIn, navigate]);
 
   const handleSubmit = async(event) => {
     event.preventDefault();
@@ -43,7 +46,7 @@ const LoginForm = () => {
     try {
       const response = await login(username, password);
       localStorage.setItem('token', response.token);
-      setIsLoggedIn(true);
+      setLoggedIn(true);
       swal({
         title: "Logged in!",
         text: "Welcome back to DoIt!",
@@ -51,11 +54,11 @@ const LoginForm = () => {
         timer: 2000,
         buttons: false
       });
-      navigate('/');
+      navigate('/dashboard');
     } catch (error) {
       swal({
-        title: "Invalid user!",
-        text: "Username or password were incorrect!",
+        title: "Login failed!",
+        text: error?.response?.data?.message ?? "Error on server connection!",
         icon: "error",
         timer: 2000,
         buttons: false

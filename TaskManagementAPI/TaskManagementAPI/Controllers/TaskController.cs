@@ -70,6 +70,13 @@ namespace TaskManagementAPI.Controllers
             return Ok(tasks);
         }
 
+        [HttpGet("shared-tasks")]
+        public async Task<IActionResult> GetSharedTasks()
+        {
+            var tasks = await _taskService.GetSharedTasks(_userId);
+            return Ok(tasks);
+        }
+
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateTask(int id, [FromBody]JsonPatchDocument<TaskEntity> taskPatch)
         {

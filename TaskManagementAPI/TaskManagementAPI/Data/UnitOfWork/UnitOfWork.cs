@@ -19,6 +19,7 @@ namespace TaskManagementAPI.Data.UnitOfWork
         public ISharedTaskRepository SharedTaskRepository => GetRepository<ISharedTaskRepository, SharedTaskRepository>();
         public ICommentRepository CommentRepository => GetRepository<ICommentRepository, CommentRepository>();
         public IUserRepository UserRepository => GetRepository<IUserRepository, UserRepository>();
+        public INotificationRepository NotificationRepository => GetRepository<INotificationRepository, NotificationRepository>();
         // Add other repository properties similarly
 
         private TInterface GetRepository<TInterface, TImplementation>()
@@ -41,7 +42,6 @@ namespace TaskManagementAPI.Data.UnitOfWork
             int affectedRows = await _dbContext.SaveChangesAsync();
             return affectedRows > 0;
         }
-
         public void Dispose() => _dbContext.Dispose();
     }
 
