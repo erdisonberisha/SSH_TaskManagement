@@ -8,8 +8,8 @@ namespace TaskManagementAPI.Models
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
-        public StatusType Status { get; set; } = StatusType.INPROGRESS;
-        public PriorityType? PriorityOfTask { get; set; }
+        public StatusType Status { get; set; } = StatusType.TODO;
+        public PriorityType? PriorityOfTask { get; set; } = PriorityType.MEDIUM;
         public int UserId { get; set; }
         [JsonIgnore]
         public User User { get; set; }
@@ -24,9 +24,11 @@ namespace TaskManagementAPI.Models
 }
 public enum StatusType
 {
+    TODO = 0,
     INPROGRESS = 1,
-    COMPLETED = 2,
-    OVERDUE = 3
+    TESTING = 2,
+    COMPLETED = 3,
+    OVERDUE = 4
 }
 
 public enum PriorityType

@@ -15,6 +15,8 @@ const RegisterForm = () => {
     const [email, setEmail] = useState('');
     const navigate = useNavigate();
 
+    console.log(email);
+
     const handleInputFocus = () => {
         setInputType('date');
     };
@@ -94,7 +96,7 @@ const RegisterForm = () => {
         } catch (error) {
             swal({
                 title: "Register failed!",
-                text: "User with that username already exists!",
+                text: error?.response?.data?.message ?? "Error on server connection!",
                 icon: "error",
                 timer: 2000,
                 buttons: false

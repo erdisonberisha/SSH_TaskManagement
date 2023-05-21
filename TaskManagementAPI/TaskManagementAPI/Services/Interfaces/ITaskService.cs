@@ -12,6 +12,7 @@ namespace TaskManagementAPI.Services.Interfaces
         Task<TaskEntity?> GetTaskById(int id, int userId);
         Task<IEnumerable<TaskEntity>> GetTasksByCategory(int categoryId, int userId);
         Task<IEnumerable<TaskEntity>> SearchTasks(SearchModel search, int userId);
+        Task<IEnumerable<TaskEntity>> GetSharedTasks(int userId);
         Task<IEnumerable<string>> SearchAutoComplete(string query, int userId);
         Task Post(TaskCreateDto taskToCreate, int userId);
         Task<TaskEntity?> Update(int id, JsonPatchDocument<TaskEntity> task, int userId);
