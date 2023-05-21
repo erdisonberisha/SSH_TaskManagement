@@ -47,6 +47,7 @@ namespace TaskManagementAPI.Helpers
             services.AddTransient<ICategoryService, CategoryService>();
             services.AddTransient<ICommentService,CommentService>();
             services.AddTransient<IUserService,UserService>();
+            services.AddTransient<INotificationService, NotificationService>();
         }
         public static void AddSwaggerWithAuth(this IServiceCollection services)
         {

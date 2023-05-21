@@ -2,13 +2,14 @@
 
 namespace TaskManagementAPI.Data.UnitOfWork
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork : IDisposable
     {
         ITaskRepository TaskRepository { get; }
         IUserRepository UserRepository { get; }
         ICategoryRepository CategoryRepository { get; }
         ISharedTaskRepository SharedTaskRepository { get; }
         ICommentRepository CommentRepository { get; }
+        INotificationRepository NotificationRepository { get; }
         Task<bool> CompleteAsync();
     }
 }

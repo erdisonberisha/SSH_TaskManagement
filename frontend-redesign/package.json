@@ -12,6 +12,7 @@
     "jsonwebtoken": "^9.0.0",
     "material-tailwindcss": "^0.0.1-security",
     "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.11.1",
     "react-scripts": "5.0.1",
