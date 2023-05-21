@@ -2,7 +2,7 @@
 <html>
 
 <body>
-  <h1>Task Management Project</h1>
+  <h1>SSH - Task Management Project</h1>
 
   <p>This repository contains a Task Management project that consists of a .NET API and a React frontend application. The API utilizes Entity Framework Core and communicates with a PostgreSQL database using a Docker Compose file. Follow the instructions below to set up and run the project.</p>
 
