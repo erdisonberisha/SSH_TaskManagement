@@ -37,3 +37,12 @@ export const getTasks = async () => {
     throw error;
   }
 };
+
+export const updateTaskStatus = async (taskId, newStatus) => {
+  try {
+    const response = await axios.patch(`/tasks/${taskId}`, { status: newStatus });
+    return response.data;
+  } catch (error) {
+    throw new Error('Error updating task status');
+  }
+};
