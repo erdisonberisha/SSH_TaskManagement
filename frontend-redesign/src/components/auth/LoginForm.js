@@ -46,7 +46,7 @@ const LoginForm = () => {
     try {
       const response = await login(username, password);
       localStorage.setItem('token', response.token);
-      setLoggedIn(true);
+      setTimeout(2000);
       swal({
         title: "Logged in!",
         text: "Welcome back to DoIt!",
@@ -54,7 +54,7 @@ const LoginForm = () => {
         timer: 2000,
         buttons: false
       });
-      navigate('/dashboard');
+      setLoggedIn(true);
     } catch (error) {
       swal({
         title: "Login failed!",
