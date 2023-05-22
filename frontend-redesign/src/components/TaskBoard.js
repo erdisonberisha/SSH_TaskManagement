@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { getTasks } from '../helpers/api';
-
+import CreateTaskForm from './CreateTask';
+import { updateTaskStatus } from '../helpers/api';
 // Enums
-const StatusType = {
+export const StatusType = {
     TODO: 0,
     INPROGRESS: 1,
     TESTING: 2,
@@ -18,22 +19,37 @@ const PriorityType = {
 };
 
 const TaskBoard = () => {
+    const [showCreateTaskForm, setShowCreateTaskForm] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState('');
     const [taskList, setTaskList] = useState([]);
 
+  
+    const handleCreateTask = (status) => {
+        setSelectedStatus(status);
+        setShowCreateTaskForm(true);
+      };
+    
+      const handleTaskFormSubmit = (newTaskData) => {
+        // ...your code for handling the submission of the new task form...
+      };
+    
+      const handleTaskFormClose = () => {
+        setShowCreateTaskForm(false);
+      };
+    
     useEffect(() => {
         const fetchTasks = async () => {
-          try {
-            const tasks = await getTasks();
-            console.log('test')
-            setTaskList(tasks);
-          } catch (error) {
-            console.log('Error fetching tasks!')
-          }
+            try {
+                const tasks = await getTasks();
+                setTaskList(tasks);
+            } catch (error) {
+                console.log('Error fetching tasks!')
+            }
         };
         fetchTasks();
-      }, []);
+    }, []);
 
-    const onDragEnd = (result) => {
+    const onDragEnd = async (result) => {
         const { destination, source } = result;
 
         // Check if dropped outside of a droppable area
@@ -53,6 +69,15 @@ const TaskBoard = () => {
         updatedTaskList.splice(destination.index, 0, draggedTask);
 
         setTaskList(updatedTaskList);
+
+        try {
+          await updateTaskStatus(draggedTask.id, draggedTask.status);
+          console.log('Task status updated successfully');
+        } catch (error) {
+          console.log('Error updating task status:', error.message);
+          // Revert the task list back to the original state on error
+          setTaskList(taskList);
+        }
     };
 
     const getColumnWidth = () => {
@@ -61,74 +86,88 @@ const TaskBoard = () => {
         const gutterWidth = 2; // Percentage of gutter width
         const columnWidth = (containerWidth - (columnCount - 1) * gutterWidth) / columnCount;
         return columnWidth;
-      };
-    
+    };
+
 
     return (
         <div className="flex flex-grow">
-            <div className="flex space-x-4 bg-gray-100 p-4 rounded w-full">
-                <DragDropContext onDragEnd={onDragEnd}>
-                    {Object.values(StatusType).map((status) => (
-                        <Droppable key={status} droppableId={`status-${status}`} type="TASK">
-                            {(provided) => (
-                                <div
-                                    className="flex flex-col min-w-0"
-                                    style={{ width: `${getColumnWidth()}%` }}
-                                >
-                                    <div className="flex items-center mb-2">
-                                        <span className="font-semibold">{getStatusLabel(status)}</span>
+          <div className="flex space-x-4 bg-gray-100 p-4 rounded w-full">
+            <DragDropContext onDragEnd={onDragEnd}>
+              {Object.values(StatusType).map((status) => (
+                <Droppable key={status} droppableId={`status-${status}`} type="TASK">
+                  {(provided) => (
+                    <div
+                      className="flex flex-col min-w-0"
+                      style={{
+                        width: `${getColumnWidth()}%`,
+                        overflowY: 'scroll',
+                        maxHeight: 'calc(100vh - 56px)',
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold">{getStatusLabel(status)}</span>
+                        <button
+                          className="px-2 py-1 text-sm bg-blue-500 text-white rounded"
+                          onClick={() => handleCreateTask(status)}
+                        >
+                          Add Task
+                        </button>
+                      </div>
+                      <div
+                        className="bg-white rounded shadow p-2 space-y-2 flex-grow"
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                      >
+                        {taskList.map((task, index) => {
+                          if (task.status === status) {
+                            return (
+                              <Draggable key={task.id} draggableId={`task-${task.id}`} index={index}>
+                                {(provided) => (
+                                  <div
+                                    className="bg-gray-200 p-2 rounded shadow"
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    ref={provided.innerRef}
+                                  >
+                                    <div className="flex items-center space-x-2">
+                                      <div className="w-4 h-4 bg-blue-500 rounded shadow" />
+                                      <span>{task.title}</span>
                                     </div>
-                                    <div
-                                        className="bg-white rounded shadow p-2 space-y-2"
-                                        {...provided.droppableProps}
-                                        ref={provided.innerRef}
-                                    >
-                                        {taskList.map((task, index) => {
-                                            if (task.status === status) {
-                                                return (
-                                                    <Draggable
-                                                        key={task.id}
-                                                        draggableId={`task-${task.id}`}
-                                                        index={index}
-                                                    >
-                                                        {(provided) => (
-                                                            <div
-                                                                className="bg-gray-200 p-2 rounded shadow"
-                                                                {...provided.draggableProps}
-                                                                {...provided.dragHandleProps}
-                                                                ref={provided.innerRef}
-                                                            >
-                                                                <div className="flex items-center space-x-2">
-                                                                    <div className="w-4 h-4 bg-blue-500 rounded shadow" />
-                                                                    <span>{task.title}</span>
-                                                                </div>
-                                                                <div className="text-xs text-gray-500">
-                                                                    {task.description}
-                                                                </div>
-                                                                <div className="text-xs text-gray-500">
-                                                                    Priority: {getPriorityLabel(task.priorityOfTask)}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </Draggable>
-                                                );
-                                            }
-                                            return null;
-                                        })}
-                                        {provided.placeholder}
+                                    <div className="text-xs text-gray-500">{task.description}</div>
+                                    <div className="text-xs text-gray-500">
+                                      Priority: {getPriorityLabel(task.priorityOfTask)}
                                     </div>
-                                </div>
-                            )}
-                        </Droppable>
-                    ))}
-                </DragDropContext>
+                                  </div>
+                                )}
+                              </Draggable>
+                            );
+                          }
+                          return null;
+                        })}
+                        {provided.placeholder}
+                      </div>
+                    </div>
+                  )}
+                </Droppable>
+              ))}
+            </DragDropContext>
+          </div>
+          {showCreateTaskForm && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+              <div className="z-10">
+                <CreateTaskForm
+                  status={selectedStatus}
+                  onSubmit={handleTaskFormSubmit}
+                  onClose={handleTaskFormClose}
+                />
+              </div>
             </div>
+          )}
         </div>
-    )
-};
-
+      );
+    };
 // Helper function to get the status label based on the status enum
-const getStatusLabel = (status) => {
+export const getStatusLabel = (status) => {
     switch (status) {
         case StatusType.INPROGRESS:
             return 'In Progress';
