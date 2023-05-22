@@ -146,6 +146,7 @@ namespace TaskManagementAPI.Services
                 CategoryId = taskToCreate.CategoryId,
                 Description = taskToCreate.Description,
                 DueDate = taskToCreate.DueDate,
+                Status = taskToCreate.Status ?? StatusType.TODO
             };
             if (task.CategoryId is null || task.CategoryId == 0)
             {
