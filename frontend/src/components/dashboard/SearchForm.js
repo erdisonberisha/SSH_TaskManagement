@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getAutocomplete, searchTasks } from '../helpers/api';
+import { getAutocomplete, searchTasks } from '../../helpers/api';
 import { getStatusColor, getPriorityLabel, getStatusLabel } from './TaskBoard';
 
 const SearchForm = () => {

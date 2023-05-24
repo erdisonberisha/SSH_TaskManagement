@@ -1,6 +1,6 @@
 import React from "react";
-import Header from "../components/Header";
-import TypingText from "../components/TypingText"
+import Header from "../components/homepage/Header";
+import TypingText from "../components/homepage/TypingText";
 
 const HomePage = () => {
     return (

@@ -1,6 +1,6 @@
 import React from "react";
-import Sidebar from "../components/Sidebar";
-import SearchForm from "../components/SearchForm";
+import Sidebar from "../components/dashboard/Sidebar";
+import SearchForm from "../components/dashboard/SearchForm";
 
 const Search = () => {
   return (
