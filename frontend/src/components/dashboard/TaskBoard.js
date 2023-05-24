@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { getTasks, deleteTask } from '../helpers/api';
+import { getTasks, deleteTask } from '../../helpers/api';
 import CreateTaskForm from './CreateTask';
-import { updateTaskStatus } from '../helpers/api';
+import { updateTaskStatus } from '../../helpers/api';
 import { Button } from '@material-tailwind/react';
 // Enums
 export const StatusType = {
