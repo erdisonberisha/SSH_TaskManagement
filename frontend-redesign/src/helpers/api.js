@@ -1,14 +1,20 @@
 import axios from 'axios';
 
-const token = localStorage.getItem('token');
 const baseURL = process.env.REACT_APP_BACKEND_URL;
 
 const api = axios.create({
   baseURL,
   headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json'
   }
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export const login = async (username, password) => {
@@ -38,9 +44,58 @@ export const getTasks = async () => {
   }
 };
 
-export const updateTaskStatus = async (taskId, newStatus) => {
+export const getAutocomplete = async (query) => {
   try {
-    const response = await axios.patch(`/tasks/${taskId}`, { status: newStatus });
+    const response = await api.get('/tasks/autocomplete', {
+      params: {
+        query: query // Add the query parameter
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const searchTasks = async (query, status, priority) => {
+  try {
+    const params = {
+      Query: query,
+      Status: status,
+      Priority: priority
+    };
+
+    const response = await api.get('/tasks/search', { params });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
+export const updateTaskStatus = async (taskId, status) => {
+  try {
+    const patchDocument = [
+      {
+        op: 'replace',
+        path: '/status',
+        value: status,
+      },
+    ];
+    const response = await api.patch(`/tasks/${taskId}`, patchDocument);
+    return response.data;
+  } catch (error) {
+    throw new Error('Error updating task status');
+  }
+};
+
+export const deleteTask = async (taskId) => {
+  try {
+    const response = await api.delete(`/tasks`, {
+      params: {
+        id: taskId
+      }});
     return response.data;
   } catch (error) {
     throw new Error('Error updating task status');
