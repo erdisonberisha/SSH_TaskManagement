@@ -106,12 +106,12 @@ const RegisterForm = () => {
 
 return (
     <div className="flex flex-col items-center justify-center h-screen mt-5">
-        <div className="text-center flex bg-cyan-600 rounded-md lg:pl-24">
+        <div className="text-center flex bg-cyan-600 rounded-md lg:pl-8">
             <div className="flex-1 items-center md:mr-20 lg:mr-0 hidden lg:flex">
-                <img src="./registerImage.png" alt="registerimage" />
+                <img src="./registerImage.png" alt="registerimage" className='pr-8' />
             </div>
             <div className='flex-1'>
-                <div className="bg-white rounded-md shadow-md text-center p-20 md:p-12 lg:p-20">
+                <div className="bg-white rounded-tr-md rounded-br-md shadow-md text-center p-20 md:p-12 lg:p-20">
                     <h1 className="text-4xl font-bold mb-10">Register</h1>
                     <form className="flex flex-col items-center space-y-4" onSubmit={handleSubmit}>
                             <input

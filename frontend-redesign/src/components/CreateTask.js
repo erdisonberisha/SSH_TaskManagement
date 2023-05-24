@@ -34,7 +34,7 @@ const CreateTaskForm = ({ status, onSubmit, onClose }) => {
     };
 
     return (
-        <div className="bg-white rounded shadow p-4" ref={formRef}>
+        <div className="bg-white rounded-md shadow p-5" ref={formRef}>
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                     <label className="block mb-1 font-semibold">Title</label>
@@ -99,16 +99,6 @@ const CreateTaskForm = ({ status, onSubmit, onClose }) => {
                         <option value="medium">Medium</option>
                         <option value="high">High</option>
                     </select>
-                </div>
-                <div className="mb-4">
-                    <label className="block mb-1 font-semibold">Invited User</label>
-                    <input
-                        type="text"
-                        name="invitedUser"
-                        value={newTaskData.invitedUser}
-                        onChange={handleInputChange}
-                        className="w-full px-2 py-1 border border-gray-300 rounded"
-                    />
                 </div>
                 <div className="flex justify-between">
                     <button

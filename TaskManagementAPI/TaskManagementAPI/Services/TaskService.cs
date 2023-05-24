@@ -72,7 +72,7 @@ namespace TaskManagementAPI.Services
 
         public async Task<IEnumerable<TaskEntity>> GetAllTasks(int userId)
         {
-            var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId && x.Status != StatusType.COMPLETED).ToListAsync();
+            var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId).ToListAsync();
             return tasks;
         }
 
@@ -84,7 +84,7 @@ namespace TaskManagementAPI.Services
 
         public async Task<IEnumerable<TaskEntity>> GetTasksByCategory(int categoryId, int userId)
         {
-            var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.CategoryId == categoryId && x.UserId == userId && x.Status != StatusType.COMPLETED).ToListAsync();
+            var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.CategoryId == categoryId && x.UserId == userId).ToListAsync();
             return tasks;
         }
 
@@ -104,8 +104,7 @@ namespace TaskManagementAPI.Services
         public async Task<IEnumerable<TaskEntity>> GetWeeklyTasks(int userId)
         {
             var tasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.DueDate.Date >= DateTime.Now.Date
-                                                           && x.DueDate.Date <= DateTime.Now.Date.AddDays(7)
-                                                           && !x.Status.Equals(StatusType.COMPLETED)).Include(x => x.Comments).ToListAsync();
+                                                           && x.DueDate.Date <= DateTime.Now.Date.AddDays(7)).Include(x => x.Comments).ToListAsync();
             return tasks;
         }
 
@@ -161,32 +160,32 @@ namespace TaskManagementAPI.Services
             List<string> autocomplete = new();
             var userTasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId).OrderByDescending(x => x.DueDate).ToListAsync();
             if (!string.IsNullOrEmpty(query))
-                autocomplete = userTasks.Where(x => x.Title.Contains(query) || x.Description.Contains(query)).Take(5).Select(x => x.Title).ToList();
+                autocomplete = userTasks.Where(x => x.Title.Contains(query) || x.Description.Contains(query)).Take(5).Select(x => x.Title).Distinct().ToList();
             return autocomplete;
         }
 
         public async Task<IEnumerable<TaskEntity>> SearchTasks(SearchModel search, int userId)
         {
-            var userTasks = await _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId).ToListAsync();
+            var userTasks = _unitOfWork.TaskRepository.GetByCondition(x => x.UserId == userId);
             if (!string.IsNullOrEmpty(search.Query))
             {
-                userTasks = userTasks.Where(x => x.Title.Contains(search.Query) || x.Description.Contains(search.Query)).ToList();
+                userTasks = userTasks.Where(x => x.Title.Contains(search.Query) || x.Description.Contains(search.Query));
             }
             if (search.CategoryId is not null)
             {
-                userTasks = userTasks.Where(x => x.CategoryId == search.CategoryId).ToList();
+                userTasks = userTasks.Where(x => x.CategoryId == search.CategoryId);
             }
             if (search.Priority is not null)
             {
-                userTasks = userTasks.Where(x => x.PriorityOfTask == search.Priority).ToList();
+                userTasks = userTasks.Where(x => x.PriorityOfTask == search.Priority);
 
             }
             if (search.Status is not null)
             {
-                userTasks = userTasks.Where(x => x.Status == search.Status).ToList();
+                userTasks = userTasks.Where(x => x.Status == search.Status);
             }
-            userTasks = userTasks.Skip((search.Page - 1) * search.PageSize).Take(search.PageSize).ToList();
-            return userTasks;
+            userTasks = userTasks.Skip((search.Page - 1) * search.PageSize).Take(search.PageSize);
+            return await userTasks.ToListAsync();
         }
 
         public async Task<TaskEntity?> Update(int id, JsonPatchDocument<TaskEntity> task, int userId)

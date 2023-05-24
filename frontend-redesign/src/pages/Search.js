@@ -1,18 +1,18 @@
 import React from "react";
 import Sidebar from "../components/Sidebar";
-import TaskBoard from "../components/TaskBoard";
+import SearchForm from "../components/SearchForm";
 
-const Dashboard = () => {
+const Search = () => {
   return (
     <div className="flex">
       <div className="w-1/4">
         <Sidebar />
       </div>
       <div className="w-3/4">
-        <TaskBoard />
+        <SearchForm />
       </div>
     </div>
   );
 };
 
-export default Dashboard;
+export default Search;

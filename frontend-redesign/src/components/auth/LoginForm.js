@@ -11,8 +11,6 @@ const LoginForm = () => {
   const { loggedIn, setLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  console.log(loggedIn);
-
   useEffect(() => {
     if (loggedIn) {
       navigate('/dashboard');
@@ -46,7 +44,6 @@ const LoginForm = () => {
     try {
       const response = await login(username, password);
       localStorage.setItem('token', response.token);
-      setTimeout(2000);
       swal({
         title: "Logged in!",
         text: "Welcome back to DoIt!",
