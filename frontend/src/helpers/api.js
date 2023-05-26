@@ -90,6 +90,15 @@ export const updateTaskStatus = async (taskId, status) => {
   }
 };
 
+export const createTask = async (taskData) => {
+  try {
+    const response = await api.post(`/tasks`, taskData);
+    return response.data;
+  } catch (error) {
+    throw new Error('Error updating task status');
+  }
+};
+
 export const deleteTask = async (taskId) => {
   try {
     const response = await api.delete(`/tasks`, {

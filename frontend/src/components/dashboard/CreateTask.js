@@ -7,8 +7,7 @@ const CreateTaskForm = ({ status, onSubmit, onClose }) => {
         description: '',
         dueDate: '',
         status: status || '',
-        priority: '',
-        invitedUser: '',
+        priorityOfTask: '',
     });
     const formRef = useRef(null);
 
@@ -23,14 +22,6 @@ const CreateTaskForm = ({ status, onSubmit, onClose }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit(newTaskData);
-        setNewTaskData({
-            title: '',
-            description: '',
-            dueDate: '',
-            status: status || '',
-            priority: '',
-            invitedUser: '',
-        });
     };
 
     return (
@@ -88,16 +79,16 @@ const CreateTaskForm = ({ status, onSubmit, onClose }) => {
                 <div className="mb-4">
                     <label className="block mb-1 font-semibold">Priority</label>
                     <select
-                        name="priority"
-                        value={newTaskData.priority}
+                        name="priorityOfTask"
+                        value={newTaskData.priorityOfTask}
                         onChange={handleInputChange}
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                         required
                     >
                         <option value="">Select Priority</option>
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
+                        <option value="1">Low</option>
+                        <option value="2">Medium</option>
+                        <option value="3">High</option>
                     </select>
                 </div>
                 <div className="flex justify-between">
