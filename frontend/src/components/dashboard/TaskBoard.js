@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { getTasks, deleteTask } from '../../helpers/api';
+import { getTasks, deleteTask, createTask } from '../../helpers/api';
 import CreateTaskForm from './CreateTask';
 import { updateTaskStatus } from '../../helpers/api';
 import { Button } from '@material-tailwind/react';
+import swal from 'sweetalert';
 // Enums
 export const StatusType = {
   TODO: 0,
@@ -27,6 +28,7 @@ const TaskBoard = () => {
 
   const handleCreateTask = (status) => {
     setSelectedStatus(status);
+    console.log(status);
     setShowCreateTaskForm(true);
   };
 
@@ -40,9 +42,43 @@ const TaskBoard = () => {
     }
   };
 
-  const handleTaskFormSubmit = (newTaskData) => {
-    // ...your code for handling the submission of the new task form...
+  const handleTaskFormSubmit = async (newTaskData) => {
+    try {
+      const currentDateTime = new Date().toISOString();
+      if (newTaskData.dueDate <= currentDateTime) {
+        swal({
+          title: "Due date incorrect!",
+          text: "Due date should be higher than the current time!",
+          icon: "warning",
+          timer: 2000,
+          buttons: false
+        });
+        return;
+      }
+      await createTask(newTaskData);
+      newTaskData.status = parseInt(newTaskData.status)
+      newTaskData.priorityOfTask = parseInt(newTaskData.priorityOfTask)
+      setTaskList([...taskList, newTaskData]);
+      setShowCreateTaskForm(false);
+      swal({
+        title: "Task saved!",
+        text: "Task was saved successfully",
+        icon: "success",
+        timer: 2000,
+        buttons: false
+      });
+    } catch (error) {
+      swal({
+        title: "Task failed to save!",
+        text: error?.response?.data?.message ?? "Error on server connection!",
+        icon: "error",
+        timer: 2000,
+        buttons: false
+      });
+      console.log('Error creating task:', error);
+    }
   };
+
 
   const handleTaskFormClose = () => {
     setShowCreateTaskForm(false);
@@ -63,10 +99,8 @@ const TaskBoard = () => {
   const onDragEnd = async (result) => {
     const { destination, source } = result;
 
-    // Check if dropped outside of a droppable area
     if (!destination) return;
 
-    // Check if dropped in a different position
     if (
       destination.droppableId === source.droppableId &&
       destination.index === source.index
@@ -85,15 +119,14 @@ const TaskBoard = () => {
       console.log('Task status updated successfully');
     } catch (error) {
       console.log('Error updating task status:', error.message);
-      // Revert the task list back to the original state on error
       setTaskList(taskList);
     }
   };
 
   const getColumnWidth = () => {
     const columnCount = Object.values(StatusType).length;
-    const containerWidth = 100; // Percentage of container width
-    const gutterWidth = 2; // Percentage of gutter width
+    const containerWidth = 100;
+    const gutterWidth = 2;
     const columnWidth = (containerWidth - (columnCount - 1) * gutterWidth) / columnCount;
     return columnWidth;
   };
@@ -107,10 +140,11 @@ const TaskBoard = () => {
             <Droppable key={status} droppableId={`status-${status}`} type="TASK">
               {(provided) => (
                 <div
-                  className="flex flex-col min-w-0"
+                  className="flex flex-col min-w-0 overflow-y-scroll no-scrollbar"
                   style={{
                     width: `${getColumnWidth()}%`,
                     overflowY: 'auto',
+
                     maxHeight: 'calc(100vh - 56px)',
                   }}
                 >
@@ -145,6 +179,7 @@ const TaskBoard = () => {
                                 </div>
                                 <div className="text-xs text-gray-500"><b>Description:</b> <i>{task.description}</i></div>
                                 <div className="text-xs text-gray-500"><b>Priority:</b> {getPriorityLabel(task.priorityOfTask)}</div>
+                                <div className="text-xs text-gray-500"><b>Due date:</b> {new Date(task.dueDate).toLocaleString()}</div>
                                 <Button
                                   color="red"
                                   size="sm"
@@ -185,14 +220,14 @@ const TaskBoard = () => {
 // Helper function to get the status label based on the status enum
 export const getStatusLabel = (status) => {
   switch (status) {
+    case StatusType.TODO:
+      return 'To do'
     case StatusType.INPROGRESS:
       return 'In Progress';
     case StatusType.COMPLETED:
       return 'Completed';
     case StatusType.OVERDUE:
       return 'Overdue';
-    case StatusType.TODO:
-      return 'To do'
     case StatusType.TESTING:
       return 'Testing'
     default:

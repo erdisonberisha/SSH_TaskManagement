@@ -159,6 +159,7 @@ useEffect(() => {
               <div className="text-xs text-gray-500"><b>Description:</b> <i>{task.description}</i></div>
               <div className="text-xs text-gray-500"><b>Priority:</b>: {getPriorityLabel(task.priorityOfTask)}</div>
               <div className="text-xs text-gray-500"><b>Status:</b> {getStatusLabel(task.status)}</div>
+              <div className="text-xs text-gray-500"><b>Due date:</b> {new Date(task.dueDate).toLocaleString()}</div>
             </div>
           ))}
         </div>
